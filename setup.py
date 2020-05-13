@@ -126,6 +126,11 @@ class BuildExt(build_ext):
             ext.extra_link_args = link_opts
         build_ext.build_extensions(self)
 
+import os.path
+this_directory = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(this_directory, "README.rst"), encoding='utf-8') as f:
+    long_description = f.read()
+        
 setup(
     name='blahtex',
     version=__version__,
@@ -133,7 +138,29 @@ setup(
     author_email='amura@tomato.sakura.ne.jp',
     url='https://github.com/amuramatsu/blahtex-py',
     description='A python binding of blahtex',
-    long_description='',
+    long_description=long_description,
+
+    keywords='tex latex mathml',
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+
+        # blahtex is BSD 3-clause license,
+        # and my codes are under same license
+        'License :: OSI Approved :: BSD License',
+
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+
+        'Topic :: Text Processing :: Markup :: LaTeX',
+        'Topic :: Text Processing :: Markup :: XML',
+    ],
+    
     packages = ['blahtex'],
     ext_modules=ext_modules,
     setup_requires=['pybind11>=2.5.0'],
