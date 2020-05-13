@@ -1,0 +1,3 @@
+[submodule "blahtexml"]
+	path = blahtexml
+	url = https://github.com/amuramatsu/blahtexml.git
