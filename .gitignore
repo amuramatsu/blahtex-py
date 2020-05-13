@@ -1,5 +1,11 @@
 *~
 \#*\#
 *.bak
+*.egg-info/
 /build
 /var
+__pycache__/
+*.pyc
+*.pyo
+*.so
+*.pyd

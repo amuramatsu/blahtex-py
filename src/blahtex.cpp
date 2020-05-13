@@ -4,7 +4,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(blahtex, m) {
+PYBIND11_MODULE(_blahtex, m) {
     m.doc() = "Blahtex binding for python";
 
     static py::exception<blahtex::Exception> ex(m, "BlahtexException");
@@ -39,7 +39,7 @@ PYBIND11_MODULE(blahtex, m) {
 		       &blahtex::Interface::mEncodingOptions)
 	.def_readwrite("purified_tex_options",
 		       &blahtex::Interface::mPurifiedTexOptions)
-	.def_readwrite("texvc_compatibililty",
+	.def_readwrite("texvc_compatibility",
 		       &blahtex::Interface::mTexvcCompatibility)
 	.def_readwrite("indented", &blahtex::Interface::mIndented);
 

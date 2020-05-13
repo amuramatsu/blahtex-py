@@ -20,7 +20,7 @@ class get_pybind_include(object):
 
 ext_modules = [
     Extension(
-        'blahtex',
+        'blahtex._blahtex',
         # Sort input source files to ensure bit-for-bit reproducible builds
         # (https://github.com/pybind/python_example/pull/53)
         sorted([
@@ -134,6 +134,7 @@ setup(
     url='https://github.com/amuramatsu/blahtex-py',
     description='A python binding of blahtex',
     long_description='',
+    packages = ['blahtex'],
     ext_modules=ext_modules,
     setup_requires=['pybind11>=2.5.0'],
     cmdclass={'build_ext': BuildExt},
