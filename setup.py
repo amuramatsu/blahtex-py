@@ -88,7 +88,7 @@ def cpp_flag(compiler):
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
     c_opts = {
-        'msvc': ['/EHsc', '/DWCHAR_T_IS_16BIT'],
+        'msvc': ['/EHsc'],
         'unix': [],
     }
     l_opts = {
@@ -101,6 +101,11 @@ class BuildExt(build_ext):
         c_opts['unix'] += darwin_opts
         l_opts['unix'] += darwin_opts
 
+    import ctypes
+    if ctypes.sizeof(ctypes.c_wchar) == 2: # wchar_t is 16bit
+        c_opts['msvc'] += [ '/DWCHAR_T_IS_16BIT' ]
+        c_opts['unix'] += [ '-DWCHAR_T_IS_16BIT' ]
+    
     def build_extensions(self):
         ct = self.compiler.compiler_type
         opts = self.c_opts.get(ct, [])
