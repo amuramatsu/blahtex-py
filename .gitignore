@@ -3,7 +3,7 @@
 *.bak
 *.egg-info/
 /build
-/var
+/dist
 __pycache__/
 *.pyc
 *.pyo
