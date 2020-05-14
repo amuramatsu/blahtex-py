@@ -168,6 +168,9 @@ setup(
     ],
     
     packages = ['blahtex'],
+    package_data = {
+        'blahtex': ['py.typed'],
+    },
     ext_modules=ext_modules,
     setup_requires=['pybind11>=2.5.0'],
     cmdclass={'build_ext': BuildExt},
