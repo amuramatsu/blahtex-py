@@ -136,7 +136,7 @@ with open(os.path.join(this_directory, "README.rst"), encoding='utf-8') as f:
     long_description = f.read()
         
 setup(
-    name='blahtex',
+    name='blahtex-py',
     version=__version__,
     author='MURAMATSU Atsushi',
     author_email='amura@tomato.sakura.ne.jp',
@@ -144,7 +144,7 @@ setup(
     description='A python binding of blahtex',
     long_description=long_description,
 
-    keywords='tex latex mathml',
+    keywords='TeX LaTeX MathML',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -161,6 +161,8 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
 
+        'Topic :: Scientific/Engineering :: Mathematics',
+        'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Text Processing :: Markup :: LaTeX',
         'Topic :: Text Processing :: Markup :: XML',
     ],
