@@ -1,36 +1,134 @@
-# Copyright (c) 2020, MURAMATSU Atsushi
+# BSD 3-Clause License
+#
+# Copyright (c) 2020, MURAMATSU Atshshi
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
+# modification, are permitted provided that the following conditions are met:
 #
-#     * Redistributions of source code must retain the above copyright
-#       notice, this list of conditions and the following disclaimer.
-#     * Redistributions in binary form must reproduce the above copyright
-#       notice, this list of conditions and the following disclaimer in
-#       the documentation and/or other materials provided with the
-#       distribution.
-#     * Neither the names of the authors nor the names of their
-#       affiliation may be used to endorse or promote products derived
-#       from this software without specific prior written permission.
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the copyright holder nor the names of its
+#    contributors may be used to endorse or promote products derived from
+#    this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from . import _blahtex
+from . import _blahtex # type: ignore
 import enum
+import textwrap
+
+BlahtexException = _blahtex.BlahtexException
 
 class Blahtex(object):
+    '''
+    Usage
+    =====
+
+    >> from blahtex import Blahtex
+    >> bl = Blahtex(spacing=Blatex.SPACING.RELAXED)
+    >> bl.indented = True
+    >> bl.convert(r'\sqrt{3} * \pi')
+    '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msqrt><mn>3</mn></msqrt><mo>*</mo><mi>π</mi></mrow></math>'
+
+    Options
+    -------
+
+    The options of blahtex are appeared by method variables of Blatex object.
+
+    indented: bool
+        Output of each MathML tag on a separate line, with indenting.
+
+        Default is False.
+
+    texvc_compatibility: bool
+        Enables use of commands thar are specific to texvc, but that are not
+        standard TeX/LaTeX/AMS-LaTeX commands
+
+        Default is False.
+
+    spacing: Blatex.SPACING
+        Controls how much MathML spacing markup to use (i.e. ``<mspace>`` tags,
+        and ``lspace/rspace`` attributes). Blahtex always uses TeX's rules
+        (or an approximation thereof) to compute how much space to place
+        between symbols in the equation, but this option describes how often
+        it will actually emit MathML spacing markup to implement its spacing
+        decisions.
+
+        Blatex.SPACING.STRICT
+            Output spacing markup everywhere possible; leave as little choice
+            as possible to the MathML renderer. This will result in the most
+            bloated output, but hopefully will look as much like TeX output as
+            possible.
+
+        Blatex.SPACING.MODERATE
+            Output spacing commands whenever blahtex thinks a typical MathML
+            renderer is likely to do something visually unsatisfactory without
+            additional help. The aim is to get good agree- ment with TeX
+            without overly bloated MathML markup. (It's very difficult to get
+            this right, so I expect it to be under continual review.)
+
+        Blatex.SPACING.RELAXED
+            Only output spacing commands when the user specifically asks for
+            them, using TeX commands like ``\,`` or ``\quad``.
+
+        Default is Blatex.SPACING.RELAXED
+
+        The magic command ``\strictspacing`` will override this setting.
+
+    disallow_plane_1: bool
+        Any characters that is not placed at Unicode BMP plane is replaced by
+        XML numeric entries or not.
+
+        Default is False.
+
+    mathml_encoding: Blatex.ENCODING
+        Controls the way blahtex output MathML charaters.
+        
+        Blatex.ENCODING.RAW
+            Output unicode characters.
+        Blatex.ENCODING.NUMERIC
+            Use XML numeric entries.
+        Blatex.ENCODING.SHORT
+            Use **short** MathML entity names.
+        Blatex.ENCODING.lONG
+            Use **long** MathML entity names.
+
+        Default is Blatex.ENCODING.RAW
+
+    other_encoding: Blatex.ENCODING
+        Controls the way blahtex output charaters except for ASCII/MathML
+        charaters.
+        
+        Blatex.ENCODING.RAW
+            Output unicode characters.
+        Blatex.ENCODING.NUMERIC
+            Use XML numeric entries.
+
+        Default is Blatex.ENCODING.RAW
+
+    mathml_version1_fonts: bool
+        Forbids use of the ``mathvariant`` attribute, which is only avaiable
+        in MathML 2.0 or later. Instead, blahtex will use MathML version 1.x
+        font attributes: ``fontfamily``, ``fontstyle`` and ``fontweight``,
+        which are all deprecated in MathML 2.0.
+
+        Default is False.
+    '''
 
     class ENCODING(enum.Enum):
         RAW = 0
@@ -44,7 +142,12 @@ class Blahtex(object):
         RELAXED = 2
 
     def __init__(self, **opts):
+        '''Constructor.
+
+        You can set options by keyword arguments.
+        '''
         super().__setattr__('_core', _blahtex.Blahtex())
+        super().__setattr__('_inputted', False)
         o = {
             "disallow_plane_1": False,
             "spacing": self.SPACING.RELAXED,
@@ -165,17 +268,38 @@ class Blahtex(object):
             return self._core.purified_tex_options.latex_before_math
 
     def set_options(self, *args, **kargs) -> None:
+        '''Set options of blahtex.
+
+        You can set options by keyword argument like as
+        >> bl.set_options(indented=True)
+        or by dictionay like as
+        >> opts = { 'spacing': bl.SPACING.STRICT }
+        >> bl.set_options(opts)  
+
+        List of options is shown at docstring of this class.
+        '''
+        
         if len(args):
             if len(args) == 1 and isinstance(args[0], dict):
                 opts = args[0]
             else:
-                raise ValueError()
+                raise ValueError('Argument must be a dictionay '
+                                 'or keyword argments')
         else:
             opts = kargs
         for k, v in opts.items():
             setattr(self, k, v)
 
     def get_options(self) -> dict:
+        '''Get all options of blahtex.
+
+        List of options is shown at docstring of this class.
+
+        Returns
+        -------
+        dict
+          Options
+        '''
         result = {}
         for key in ("indented",  "texvc_compatibility", "spacing",
                     "disallow_plane_1", "mathml_encoding", "other_encoding",
@@ -186,24 +310,83 @@ class Blahtex(object):
         return result
 
     def process_input(self, s: str, display_math: bool=False) -> None:
+        '''Set input TeX-string to blahtex.
+
+        Paramters
+        ---------
+        s : str
+          TeX/LaTeX/AMS-LaTeX string. Supported commands are listed on
+          a document of blahtex-0.9.
+        display_math: bool=Flase
+          Input string are assumed at display-math environment. When this
+          argmuent is False (default), TeX-stirng is assumed at inline-math.
+
+        Raises
+        ------
+        BlahtexException
+          If s is not recognized by blahtex.
+        '''
+        super().__setattr__('_inputted', True)
         self._core.purified_tex_options.display_math = display_math
         self._core.process_input(s, display_math)
     
     def get_mathml(self) -> str:
+        '''Get MathML string converted by blahtex.
+
+        Returns
+        -------
+        str
+          MathML converted form TeX-string
+
+        Raises
+        ------
+        ValueError
+          If no TeX-string is inputted by ``process_input()``.
+        '''
+        if not self._inputted:
+            raise ValueError("no TeX-string is processed")
         if self._core.purified_tex_options.display_math:
             display = "block"
         else:
             display = "inline"
-        return ('<math xmlns="http://www.w3.org/1998/Math/MathML" ' +
-                'display="{}">'.format(display) +
-                self._core.get_mathml() + "</math>")
+        head = ('<math xmlns="http://www.w3.org/1998/Math/MathML" ' +
+                'display="{}">'.format(display))
+        body = self._core.get_mathml()
+        if self.indented:
+            return head + "\n" + textwrap.indent(body, "  ") + "</math>\n"
+        return head + body + "</math>"
 
     def get_purified_tex(self) -> str:
+        if not self._inputted:
+            raise ValueError("no TeX-string is processed")
         return self._core.get_purified_tex()
 
     def get_purified_tex_only(self) -> str:
+        if not self._inputted:
+            raise ValueError("no TeX-string is processed")
         return self._core.get_purified_tex_only()
 
     def convert(self, latex: str, display_math: bool=False) -> str:
+        '''Convert TeX-string to MathML.
+
+        Paramters
+        ---------
+        s : str
+          TeX/LaTeX/AMS-LaTeX string. Supported commands are listed on
+          a document of blahtex-0.9.
+        display_math: bool=Flase
+          Input string are assumed at display-math environment. When this
+          argmuent is False (default), TeX-stirng is assumed at inline-math.
+
+        Returns
+        -------
+        str
+          MathML converted form TeX-string
+
+        Raises
+        ------
+        BlahtexException
+          If s is not recognized by blahtex.
+        '''
         self.process_input(latex, display_math)
         return self.get_mathml()
