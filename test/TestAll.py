@@ -6,9 +6,22 @@ class TestAll(unittest.TestCase):
     def test_convert(self):
         bt = Blahtex()
         self.assertEqual(
-            bt.convert("\sqrt{3}").replace("\n", ""),
+            bt.convert("\sqrt{3}"),
             '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><msqrt><mn>3</mn></msqrt></math>')
 
+    def test_plane1(self):
+        bt = Blahtex(mathml_version1_fonts=True)
+        self.assertEqual(
+            bt.convert("\mathfrak{ABCDEF}"),
+            '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">'
+            '<mrow><mi>\U0001D504</mi>'
+            '<mi>\U0001D505</mi>'
+            '<mi>\U0000212D</mi>'
+            '<mi>\U0001D507</mi>'
+            '<mi>\U0001D508</mi>'
+            '<mi>\U0001D509</mi></mrow>'
+            '</math>')
+        
     def test_options(self):
         bt = Blahtex(japanese_font='ipaex.ttf')
         options = bt.get_options()
